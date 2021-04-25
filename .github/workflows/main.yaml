@@ -6,6 +6,7 @@ on:
 
 env:
   NAME: AverrAglow_ShopifyOrders
+  TOPIC: shopify_orders
 
 jobs:
   deploy:
@@ -25,8 +26,8 @@ jobs:
         gcloud functions deploy ${{ env.NAME }}
         --entry-point=main
         --project=${{ secrets.PROJECT_ID }}
-        --allow-unauthenticated
+        --memory=1024MB
         --runtime=python38
-        --trigger-http
+        --trigger-topic=${{ env.TOPIC }}
         --service-account=${{ secrets.GCP_SA }}
         --set-env-vars=API_KEY=${{ secrets.API_KEY }},API_SECRET=${{ secrets.API_SECRET }},API_VER=${{ secrets.API_VER }},SHOP_URL=${{ secrets.SHOP_URL }},DATASET=${{ secrets.DATASET }},TABLE=${{ secrets.TABLE }}
