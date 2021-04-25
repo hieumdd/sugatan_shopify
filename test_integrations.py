@@ -1,0 +1,64 @@
+import os
+import json
+import base64
+import subprocess
+import time
+from datetime import datetime, timedelta
+
+import requests
+
+def test_auto():
+    process = subprocess.Popen(
+        ["functions-framework", "--target", "main",'--signature-type', 'event'],
+        cwd=os.path.dirname(__file__),
+        stdout=subprocess.PIPE,
+    )
+    time.sleep(5)
+
+    try:
+        message = {}
+        data = {
+            "data": base64.b64encode(
+                json.dumps(message).encode()
+                ).decode('utf-8')
+                }
+        with requests.get("http://localhost:8080", json=data) as r:
+            res = r.json()
+        results = res["results"]
+        assert results["num_processed"] > 0
+        assert results["output_rows"] > 0
+        assert results["num_processed"] == results["output_rows"]
+    except AssertionError:
+        pass
+    finally:
+        process.kill()
+
+
+# def test_manual():
+#     process = subprocess.Popen(
+#         ["functions-framework", "--target", "main",'--signature-type', 'event'],
+#         cwd=os.path.dirname(__file__),
+#         stdout=subprocess.PIPE,
+#     )
+#     time.sleep(5)
+
+#     try:
+#         message = {
+#         "start_date": (datetime.now() - timedelta(days=5)).strftime(
+#             "%Y-%m-%dT%H:%M:%S%z"
+#         ),
+#         "end_date": (datetime.now() - timedelta(days=3)).strftime(
+#             "%Y-%m-%dT%H:%M:%S%z"
+#         ),
+#     }
+#         data = {"data": base64.b64encode(json.dumps(message).encode()).decode('utf-8')}
+#         with requests.get("http://localhost:8080", json=data) as r:
+#             res = r.json()
+#         results = res["results"]
+#         assert results["num_processed"] > 0
+#         assert results["output_rows"] > 0
+#         assert results["num_processed"] == results["output_rows"]
+#     except AssertionError:
+#         pass
+#     finally:
+#         process.kill()

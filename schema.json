@@ -1,0 +1,66 @@
+[
+	{
+		"name": "id",
+		"type": "INTEGER"
+	},
+	{
+		"name": "app_id",
+		"type": "INTEGER"
+	},
+	{
+		"name": "closed_at",
+		"type": "TIMESTAMP"
+	},
+	{
+		"name": "created_at",
+		"type": "TIMESTAMP"
+	},
+	{
+		"name": "currency",
+		"type": "STRING"
+	},
+	{
+		"name": "email",
+		"type": "STRING"
+	},
+	{
+		"name": "order_number",
+		"type": "INTEGER"
+	},
+	{
+		"name": "processed_at",
+		"type": "TIMESTAMP"
+	},
+	{
+		"name": "source_name",
+		"type": "STRING"
+	},
+	{
+		"name": "subtotal_price",
+		"type": "FLOAT"
+	},
+	{
+		"name": "total_discounts",
+		"type": "FLOAT"
+	},
+	{
+		"name": "total_price",
+		"type": "FLOAT"
+	},
+	{
+		"name": "updated_at",
+		"type": "TIMESTAMP"
+	},
+	{
+		"name": "customer",
+		"type": "STRING"
+	},
+	{
+		"name": "line_items",
+		"type": "STRING"
+	},
+	{
+		"name": "refunds",
+		"type": "STRING"
+	}
+]
