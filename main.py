@@ -26,7 +26,7 @@ class ShopifyOrdersJob:
         now = datetime.now()
         self.end_date = kwargs.get("end_date", now.strftime(TIMESTAMP_FORMAT))
         self.start_date = kwargs.get(
-            "start_date", (now - timedelta(days=2)).strftime(TIMESTAMP_FORMAT)
+            "start_date", (now - timedelta(days=30)).strftime(TIMESTAMP_FORMAT)
         )
 
         with open("config.json", "r") as f:
@@ -130,13 +130,14 @@ class ShopifyOrdersJob:
 
 def main(request):
     request_json = request.get_json()
-    if request_json:
-        if "start_date" in request_json and "end_date" in request_json:
-            job = ShopifyOrdersJob(
-                    start_date=request_json["start_date"], end_date=request_json["end_date"]
-                )
-        else:
-            job = ShopifyOrdersJob()
+    message = request_json.get('message')
+    data_bytes = message.get('data')
+    data = json.loads(base64.b64decode(data_bytes).decode("utf-8"))
+    if "start_date" in data and "end_date" in data:
+        job = ShopifyOrdersJob(
+                start_date=data["start_date"],
+                end_date=data["end_date"]
+            )
     else:
         job = ShopifyOrdersJob()
 
