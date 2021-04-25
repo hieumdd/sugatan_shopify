@@ -4,12 +4,8 @@ on:
     branches: [master]
   workflow_dispatch:
 
-env:
-  NAME: AverrAglow_ShopifyOrders
-  TOPIC: shopify_orders
-
 jobs:
-  deploy:
+  setup:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout
@@ -20,14 +16,31 @@ jobs:
       with:
         service_account_key: ${{ secrets.GCP_SA_KEY }}
         export_default_credentials: true
-
+  
+  deploy:
+    runs-on: ubuntu-latest
+    needs: setup
+    strategy:
+      matrix:
+       include:
+         - NAME: AverrAglow_Shopify
+           API_KEY: ${{ secrets.AVERRAGLOW_API_KEY }}
+           API_SECRET: ${{ secrets.AVERRAGLOW_API_SECRET }}
+           SHOP_URL: ${{ secrets.AVERRAGLOW_SHOP_URL }}
+    steps:
     - name: Deploy to Cloud Functions
+      env:
+        NAME: ${{ matrix.NAME }}
+        API_KEY: ${{ matrix.API_KEY }}
+        API_SECRET: ${{ matrix.API_SECRET }}
+        SHOP_URL: ${{ matrix.SHOP_URL }}
+        API_VER: 2021-04
       run: >-
         gcloud functions deploy ${{ env.NAME }}
         --entry-point=main
         --project=${{ secrets.PROJECT_ID }}
         --memory=1024MB
         --runtime=python38
-        --trigger-topic=${{ env.TOPIC }}
+        --trigger-http
         --service-account=${{ secrets.GCP_SA }}
-        --set-env-vars=API_KEY=${{ secrets.API_KEY }},API_SECRET=${{ secrets.API_SECRET }},API_VER=${{ secrets.API_VER }},SHOP_URL=${{ secrets.SHOP_URL }},DATASET=${{ secrets.DATASET }},TABLE=${{ secrets.TABLE }}
+        --set-env-vars=API_KEY=${{ env.API_KEY }},API_SECRET=${{ env.API_SECRET }},API_VER=${{ env.API_VER }},SHOP_URL=${{ env.SHOP_URL }},DATASET=${{ env.NAME }}

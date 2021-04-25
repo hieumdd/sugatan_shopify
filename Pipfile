@@ -12,9 +12,9 @@ python-dotenv = "*"
 
 [dev-packages]
 black = "*"
-functions-framework = "*"
 pytest = "*"
 pytest-dotenv = "*"
+functions-framework = "*"
 
 [requires]
 python_version = "3.8"

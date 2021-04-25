@@ -18,7 +18,8 @@ class ShopifyOrdersJob:
         self.API_VER = os.getenv("API_VER")
         self.SHOP_URL = os.getenv("SHOP_URL")
         self.DATASET = os.getenv("DATASET")
-        self.TABLE = os.getenv("TABLE")
+        
+        self.TABLE = "Orders"
 
         self.client = bigquery.Client()
 
@@ -127,22 +128,18 @@ class ShopifyOrdersJob:
         }
 
 
-def main(event, context):
-    if 'data' in event:
-        message = base64.b64decode(event['data']).decode("utf-8")
-        if message:
-            message = json.loads(message)
-            if "start_date" in message and "end_date" in message:
-                AverrAglowShopify = ShopifyOrdersJob(
-                    start_date=message["start_date"], end_date=message["end_date"]
+def main(request):
+    request_json = request.get_json()
+    if request_json:
+        if "start_date" in request_json and "end_date" in request_json:
+            job = ShopifyOrdersJob(
+                    start_date=request_json["start_date"], end_date=request_json["end_date"]
                 )
-            else:
-                AverrAglowShopify = ShopifyOrdersJob()
         else:
-            AverrAglowShopify = ShopifyOrdersJob()
+            job = ShopifyOrdersJob()
     else:
-        AverrAglowShopify = ShopifyOrdersJob()
+        job = ShopifyOrdersJob()
 
-    response = {"pipelines": "Shopify Orders", "results": AverrAglowShopify.run()}
+    response = {"pipelines": "Shopify Orders", "results": job.run()}
     print(response)
     return response
