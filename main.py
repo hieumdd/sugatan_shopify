@@ -26,7 +26,7 @@ class ShopifyOrdersJob:
         now = datetime.now()
         self.end_date = kwargs.get("end_date", now.strftime(TIMESTAMP_FORMAT))
         self.start_date = kwargs.get(
-            "start_date", (now - timedelta(days=30)).strftime(TIMESTAMP_FORMAT)
+            "start_date", (now - timedelta(days=3)).strftime(TIMESTAMP_FORMAT)
         )
 
         with open("config.json", "r") as f:

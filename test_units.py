@@ -7,7 +7,11 @@ from main import main
 
 
 def test_auto():
-    data = {}
+    data = {
+        "message": {
+            "data": base64.b64encode(json.dumps({}).encode("utf-8")).decode("utf-8")
+        }
+    }
     req = Mock(get_json=Mock(return_value=data), args=data)
     res = main(req)
     results = res["results"]
@@ -18,14 +22,21 @@ def test_auto():
 
 def test_manual():
     data = {
-        "start_date": (datetime.now() - timedelta(days=5)).strftime(
-            "%Y-%m-%dT%H:%M:%S%z"
-        ),
-        "end_date": (datetime.now() - timedelta(days=3)).strftime(
-            "%Y-%m-%dT%H:%M:%S%z"
-        ),
+        "message": {
+            "data": base64.b64encode(
+                json.dumps(
+                    {
+                        "start_date": (datetime.now() - timedelta(days=5)).strftime(
+                            "%Y-%m-%dT%H:%M:%S%z"
+                        ),
+                        "end_date": (datetime.now() - timedelta(days=3)).strftime(
+                            "%Y-%m-%dT%H:%M:%S%z"
+                        ),
+                    }
+                ).encode("utf-8")
+            ).decode("utf-8")
+        }
     }
-    data = {}
     req = Mock(get_json=Mock(return_value=data), args=data)
     res = main(req)
     results = res["results"]
