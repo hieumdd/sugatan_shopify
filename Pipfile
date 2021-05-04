@@ -6,7 +6,6 @@ name = "pypi"
 [packages]
 requests = "*"
 google-cloud-bigquery = "*"
-tqdm = "*"
 jinja2 = "*"
 python-dotenv = "*"
 

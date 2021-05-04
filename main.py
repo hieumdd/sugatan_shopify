@@ -4,7 +4,6 @@ import base64
 from datetime import datetime, timedelta
 
 import requests
-from tqdm import tqdm
 import jinja2
 from google.cloud import bigquery
 
@@ -17,8 +16,10 @@ class ShopifyOrdersJob:
         self.API_SECRET = os.getenv("API_SECRET")
         self.API_VER = os.getenv("API_VER")
         self.SHOP_URL = os.getenv("SHOP_URL")
-        self.DATASET = os.getenv("DATASET")
-        
+
+        BUSINESS = os.getenv("BUSINESS")
+        self.dataset = f"{BUSINESS}_Shopify"
+
         self.TABLE = "Orders"
 
         self.client = bigquery.Client()
@@ -26,7 +27,7 @@ class ShopifyOrdersJob:
         now = datetime.now()
         self.end_date = kwargs.get("end_date", now.strftime(TIMESTAMP_FORMAT))
         self.start_date = kwargs.get(
-            "start_date", (now - timedelta(days=3)).strftime(TIMESTAMP_FORMAT)
+            "start_date", (now - timedelta(days=30)).strftime(TIMESTAMP_FORMAT)
         )
 
         with open("config.json", "r") as f:
@@ -37,8 +38,8 @@ class ShopifyOrdersJob:
     def fetch(self):
         INITIAL_URL = f"https://{self.API_KEY}:{self.API_SECRET}@{self.SHOP_URL}/admin/api/{self.API_VER}/orders.json"
 
+        orders = []
         with requests.Session() as session:
-            orders = []
             params = {
                 "limit": 250,
                 "status": "any",
@@ -46,47 +47,27 @@ class ShopifyOrdersJob:
                 "updated_at_max": self.end_date,
                 "fields": ",".join(self.fields),
             }
-
-            with session.get(INITIAL_URL, params=params) as r:
-                res = r.json()
-                orders.extend(res.get("orders"))
-                next_link = r.links.get("next")
-                if next_link:
-                    url = next_link.get("url")
-                    if url:
-                        url = url.replace(
-                            self.SHOP_URL,
-                            f"{self.API_KEY}:{self.API_SECRET}@{self.SHOP_URL}",
-                        )
-                    else:
-                        url = None
-                else:
-                    url = None
-
+            url = INITIAL_URL
             while url:
-                params = {
-                    "limit": 250,
-                }
-                with session.get(url) as r:
+                with session.get(url, params=params) as r:
                     res = r.json()
                     orders.extend(res.get("orders"))
                     next_link = r.links.get("next")
                     if next_link:
                         url = next_link.get("url")
-                        if url:
-                            url = url.replace(
-                                self.SHOP_URL,
-                                f"{self.API_KEY}:{self.API_SECRET}@{self.SHOP_URL}",
-                            )
-                        else:
-                            url = None
+                        url = url.replace(
+                            self.SHOP_URL,
+                            f"{self.API_KEY}:{self.API_SECRET}@{self.SHOP_URL}",
+                        )
+                        print(len(orders))
                     else:
                         url = None
+                params = {"limit": 250}
 
         return orders
 
     def transform(self, rows):
-        for i in tqdm(rows):
+        for i in rows:
             for f in self.encoded_fields:
                 i[f] = json.dumps(i[f])
         self.num_processed = len(rows)
@@ -128,16 +109,12 @@ class ShopifyOrdersJob:
         }
 
 
-def main(request):
-    request_json = request.get_json()
-    message = request_json.get('message')
-    data_bytes = message.get('data')
-    data = json.loads(base64.b64decode(data_bytes).decode("utf-8"))
-    if "start_date" in data and "end_date" in data:
-        job = ShopifyOrdersJob(
-                start_date=data["start_date"],
-                end_date=data["end_date"]
-            )
+def main(event, context):
+    data = event["data"]
+    message = json.loads(base64.b64decode(data).decode("utf-8"))
+    print(message)
+    if "start_date" in message and "end_date" in message:
+        job = ShopifyOrdersJob(start_date=message["start_date"], end_date=message["end_date"])
     else:
         job = ShopifyOrdersJob()
 

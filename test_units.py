@@ -4,42 +4,30 @@ from unittest.mock import Mock
 from datetime import datetime, timedelta
 
 from main import main
+from assertions import assertion
 
+mock_context = Mock()
+mock_context.event_id = "617187464135194"
+mock_context.timestamp = "2019-07-15T22:09:03.761Z"
 
 def test_auto():
-    data = {
-        "message": {
-            "data": base64.b64encode(json.dumps({}).encode("utf-8")).decode("utf-8")
-        }
-    }
-    req = Mock(get_json=Mock(return_value=data), args=data)
-    res = main(req)
-    results = res["results"]
-    assert results["num_processed"] > 0
-    assert results["output_rows"] > 0
-    assert results["num_processed"] == results["output_rows"]
+    message = {}
+    message_json = json.dumps(message)
+    event = {"data": base64.b64encode(message_json.encode("utf-8"))}
+    res = main(event, mock_context)
+    assertion(res)
 
 
 def test_manual():
-    data = {
-        "message": {
-            "data": base64.b64encode(
-                json.dumps(
-                    {
-                        "start_date": (datetime.now() - timedelta(days=5)).strftime(
-                            "%Y-%m-%dT%H:%M:%S%z"
-                        ),
-                        "end_date": (datetime.now() - timedelta(days=3)).strftime(
-                            "%Y-%m-%dT%H:%M:%S%z"
-                        ),
-                    }
-                ).encode("utf-8")
-            ).decode("utf-8")
-        }
+    message = {
+        "start_date": (datetime.now() - timedelta(days=5)).strftime(
+            "%Y-%m-%dT%H:%M:%S%z"
+        ),
+        "end_date": (datetime.now() - timedelta(days=3)).strftime(
+            "%Y-%m-%dT%H:%M:%S%z"
+        ),
     }
-    req = Mock(get_json=Mock(return_value=data), args=data)
-    res = main(req)
-    results = res["results"]
-    assert results["num_processed"] > 0
-    assert results["output_rows"] > 0
-    assert results["num_processed"] == results["output_rows"]
+    message_json = json.dumps(message)
+    event = {"data": base64.b64encode(message_json.encode("utf-8"))}
+    res = main(event, mock_context)
+    assertion(res)
