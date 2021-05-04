@@ -18,7 +18,7 @@ class ShopifyOrdersJob:
         self.SHOP_URL = os.getenv("SHOP_URL")
 
         BUSINESS = os.getenv("BUSINESS")
-        self.dataset = f"{BUSINESS}_Shopify"
+        self.DATASET = f"{BUSINESS}_Shopify"
 
         self.TABLE = "Orders"
 
