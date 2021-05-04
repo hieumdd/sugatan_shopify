@@ -8,6 +8,7 @@ requests = "*"
 google-cloud-bigquery = "*"
 jinja2 = "*"
 python-dotenv = "*"
+functions-framework = "*"
 
 [dev-packages]
 black = "*"

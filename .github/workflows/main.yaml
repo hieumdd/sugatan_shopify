@@ -4,6 +4,12 @@ on:
     branches: [master]
   workflow_dispatch:
 
+env:
+  PROJECT_ID: ${{ secrets.PROJECT_ID }}
+  TOPIC: shopify_orders
+  REGION: us-central1
+
+
 jobs:
   setup:
     runs-on: ubuntu-latest
@@ -12,7 +18,8 @@ jobs:
         clients: [AverrAglow]
         include:
           - clients: AverrAglow
-            NAME: AVERRAGLOW_CLIENT_NAME
+            SERVICE: AverrAglow-Shopify
+            BUSINESS: AverrAglow
             API_KEY: AVERRAGLOW_API_KEY
             API_SECRET: AVERRAGLOW_API_SECRET
             SHOP_URL: AVERRAGLOW_SHOP_URL
@@ -25,20 +32,31 @@ jobs:
         with:
           service_account_key: ${{ secrets.GCP_SA_KEY }}
           export_default_credentials: true
+      
+      - name: Authorize Docker push
+        run: gcloud auth configure-docker
+
+      - name: Build and Push Container
+        run: |-
+          docker build -t gcr.io/${{ env.PROJECT_ID }}/${{ env.SERVICE }}:${{ github.sha }} ./
+          docker push gcr.io/${{ env.PROJECT_ID }}/${{ env.SERVICE }}:${{ github.sha }}
 
       - name: Deploy to Cloud Functions
         env:
           NAME: ${{ matrix.NAME }}
+          SERVICE: ${{ maxtrix.SERVICE }}
           API_KEY: ${{ matrix.API_KEY }}
           API_SECRET: ${{ matrix.API_SECRET }}
           SHOP_URL: ${{ matrix.SHOP_URL }}
           API_VER: 2021-04
         run: >-
-          gcloud functions deploy ${{ secrets[matrix.NAME] }}
-          --entry-point=main
-          --project=${{ secrets.PROJECT_ID }}
-          --memory=1024MB
-          --runtime=python38
-          --trigger-http
+          gcloud run deploy ${{ env.SERVICE }}
+          --image=gcr.io/${{ env.PROJECT_ID }}/${{ env.SERVICE }}:${{  github.sha }}
+          --concurrency=1
+          --memory=1Gi
+          --cpu=2
+          --platform=managed
           --service-account=${{ secrets.GCP_SA }}
+          --region=${{ env.REGION }}
+          --timeout=1200
           --set-env-vars=API_KEY=${{ secrets[matrix.API_KEY] }},API_SECRET=${{ secrets[matrix.API_SECRET] }},API_VER=${{ env.API_VER }},SHOP_URL=${{ secrets[matrix.SHOP_URL] }},DATASET=${{ secrets[matrix.NAME] }}
