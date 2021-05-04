@@ -44,7 +44,7 @@ jobs:
       - name: Deploy to Cloud Functions
         env:
           NAME: ${{ matrix.NAME }}
-          SERVICE: ${{ maxtrix.SERVICE }}
+          SERVICE: ${{ matrix.SERVICE }}
           API_KEY: ${{ matrix.API_KEY }}
           API_SECRET: ${{ matrix.API_SECRET }}
           SHOP_URL: ${{ matrix.SHOP_URL }}
