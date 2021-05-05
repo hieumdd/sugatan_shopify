@@ -52,6 +52,7 @@ jobs:
           SHOP_URL: ${{ matrix.SHOP_URL }}
         run: >-
           gcloud beta run deploy ${{ matrix.SERVICE }}
+          --quiet
           --image=gcr.io/${{ env.PROJECT_ID }}/${{ matrix.SERVICE }}:${{  github.sha }}
           --concurrency=1
           --memory=1Gi
