@@ -12,7 +12,47 @@ env:
 
 
 jobs:
+  gcf:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        clients: [AverrAglow]
+        include:
+          - clients: AverrAglow
+            NAME: AVERRAGLOW_CLIENT_NAME
+            API_KEY: AVERRAGLOW_API_KEY
+            API_SECRET: AVERRAGLOW_API_SECRET
+            SHOP_URL: AVERRAGLOW_SHOP_URL
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Setup Cloud SDK
+        uses: google-github-actions/setup-gcloud@v0.2.0
+        with:
+          service_account_key: ${{ secrets.GCP_SA_KEY }}
+          export_default_credentials: true
+
+      - name: Deploy to Cloud Functions
+        env:
+          NAME: ${{ matrix.NAME }}
+          BUSINESS: ${{ matrix.clients }}
+          API_KEY: ${{ matrix.API_KEY }}
+          API_SECRET: ${{ matrix.API_SECRET }}
+          SHOP_URL: ${{ matrix.SHOP_URL }}
+        run: >-
+          gcloud functions deploy ${{ secrets[matrix.NAME] }}
+          --entry-point=main
+          --timeout=530
+          --project=${{ env.PROJECT_ID }}
+          --memory=1024MB
+          --runtime=python38
+          --trigger-topic=${{ env.TOPIC_ID }}
+          --service-account=${{ secrets.GCP_SA }}
+          --set-env-vars=API_KEY=${{ secrets[matrix.API_KEY] }},API_SECRET=${{ secrets[matrix.API_SECRET] }},API_VER=${{ env.API_VER }},SHOP_URL=${{ secrets[matrix.SHOP_URL] }},BUSINESS=${{ env.BUSINESS }}
+
   gcr:
+    if: github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -66,41 +106,4 @@ jobs:
           --timeout=1200
           --set-env-vars=API_KEY=${{ secrets[matrix.API_KEY] }},API_SECRET=${{ secrets[matrix.API_SECRET] }},API_VER=${{ env.API_VER }},SHOP_URL=${{ secrets[matrix.SHOP_URL] }},BUSINESS=${{ env.BUSINESS }}
 
-  gcf:
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        clients: [AverrAglow]
-        include:
-          - clients: AverrAglow
-            NAME: AVERRAGLOW_CLIENT_NAME
-            API_KEY: AVERRAGLOW_API_KEY
-            API_SECRET: AVERRAGLOW_API_SECRET
-            SHOP_URL: AVERRAGLOW_SHOP_URL
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-
-      - name: Setup Cloud SDK
-        uses: google-github-actions/setup-gcloud@v0.2.0
-        with:
-          service_account_key: ${{ secrets.GCP_SA_KEY }}
-          export_default_credentials: true
-
-      - name: Deploy to Cloud Functions
-        env:
-          NAME: ${{ matrix.NAME }}
-          BUSINESS: ${{ matrix.clients }}
-          API_KEY: ${{ matrix.API_KEY }}
-          API_SECRET: ${{ matrix.API_SECRET }}
-          SHOP_URL: ${{ matrix.SHOP_URL }}
-        run: >-
-          gcloud functions deploy ${{ secrets[matrix.NAME] }}
-          --entry-point=main
-          --timeout=530
-          --project=${{ env.PROJECT_ID }}
-          --memory=1024MB
-          --runtime=python38
-          --trigger-topic=${{ env.TOPIC_ID }}
-          --service-account=${{ secrets.GCP_SA }}
-          --set-env-vars=API_KEY=${{ secrets[matrix.API_KEY] }},API_SECRET=${{ secrets[matrix.API_SECRET] }},API_VER=${{ env.API_VER }},SHOP_URL=${{ secrets[matrix.SHOP_URL] }},BUSINESS=${{ env.BUSINESS }}
+  
