@@ -1,4 +1,4 @@
-name: deploy
+name: CD
 on:
   push:
     branches: [master]
@@ -42,6 +42,10 @@ jobs:
           docker build -t gcr.io/${{ env.PROJECT_ID }}/${{ matrix.SERVICE }}:${{ github.sha }} .
           docker push gcr.io/${{ env.PROJECT_ID }}/${{ matrix.SERVICE }}:${{ github.sha }}
 
+      - name: Install gcloud beta
+        run: >-
+          gcloud components install beta
+
       - name: Deploy to Cloud Run
         env:
           NAME: ${{ matrix.NAME }}
@@ -52,7 +56,6 @@ jobs:
           SHOP_URL: ${{ matrix.SHOP_URL }}
         run: >-
           gcloud beta run deploy ${{ matrix.SERVICE }}
-          --quiet
           --image=gcr.io/${{ env.PROJECT_ID }}/${{ matrix.SERVICE }}:${{  github.sha }}
           --concurrency=1
           --memory=1Gi
