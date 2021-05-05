@@ -19,7 +19,7 @@ jobs:
         clients: [AverrAglow]
         include:
           - clients: AverrAglow
-            SERVICE: AverrAglow-Shopify
+            SERVICE: averraglow-shopify
             API_KEY: AVERRAGLOW_API_KEY
             API_SECRET: AVERRAGLOW_API_SECRET
             SHOP_URL: AVERRAGLOW_SHOP_URL
@@ -42,7 +42,7 @@ jobs:
           docker build -t gcr.io/${{ env.PROJECT_ID }}/${{ matrix.SERVICE }}:${{ github.sha }} .
           docker push gcr.io/${{ env.PROJECT_ID }}/${{ matrix.SERVICE }}:${{ github.sha }}
 
-      - name: Deploy to Cloud Functions
+      - name: Deploy to Cloud Run
         env:
           NAME: ${{ matrix.NAME }}
           BUSINESS: ${{ matrix.clients }}
@@ -51,7 +51,7 @@ jobs:
           API_SECRET: ${{ matrix.API_SECRET }}
           SHOP_URL: ${{ matrix.SHOP_URL }}
         run: >-
-          gcloud run deploy ${{ matrix.SERVICE }}
+          gcloud beta run deploy ${{ matrix.SERVICE }}
           --image=gcr.io/${{ env.PROJECT_ID }}/${{ matrix.SERVICE }}:${{  github.sha }}
           --concurrency=1
           --memory=1Gi
@@ -94,7 +94,7 @@ jobs:
           gcloud functions deploy ${{ secrets[matrix.NAME] }}
           --entry-point=main
           --timeout=530
-          --project=${{ secrets.PROJECT_ID }}
+          --project=${{ env.PROJECT_ID }}
           --memory=1024MB
           --runtime=python38
           --trigger-topic=${{ env.TOPIC_ID }}
