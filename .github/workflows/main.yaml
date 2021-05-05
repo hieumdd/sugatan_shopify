@@ -6,7 +6,7 @@ on:
 
 env:
   PROJECT_ID: ${{ secrets.PROJECT_ID }}
-  TOPIC: shopify_orders
+  TOPIC_ID: shopify_orders
   REGION: us-central1
   API_VER: 2021-04
 
