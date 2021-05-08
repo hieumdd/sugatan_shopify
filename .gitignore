@@ -152,3 +152,4 @@ backup/
 tmp/
 
 sugatan*
+clients.yaml
