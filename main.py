@@ -92,7 +92,10 @@ class ShopifyOrdersJob:
 
         for i in rows:
             for f in self.encoded_fields:
-                i[f] = json.dumps(i[f])
+                try:
+                    i[f] = json.dumps(i[f])
+                except:
+                    pass
         self.num_processed = len(rows)
         return rows
 

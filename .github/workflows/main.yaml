@@ -24,6 +24,12 @@ jobs:
             API_SECRET: AVERRAGLOW_API_SECRET
             SHOP_URL: AVERRAGLOW_SHOP_URL
 
+          - clients: Moxielash
+            FUNCTIONS_NAME: Moxielash_Shopify
+            API_KEY: MOXIELASH_API_KEY
+            API_SECRET: MOXIELASH_API_SECRET
+            SHOP_URL: MOXIELASH_SHOP_URL
+
           - clients: MaineRoast
             FUNCTIONS_NAME: MaineRoast_Shopify
             API_KEY: MAINEROAST_API_KEY
