@@ -1,0 +1,99 @@
+{
+	"keys": {
+		"p_key": [
+			"id"
+		],
+		"incre_key": "updated_at"
+	},
+	"fields": {
+		"fields": [
+			"app_id",
+			"closed_at",
+			"created_at",
+			"currency",
+			"customer",
+			"email",
+			"id",
+			"line_items",
+			"order_number",
+			"processed_at",
+			"refunds",
+			"source_name",
+			"subtotal_price",
+			"total_discounts",
+			"total_price",
+			"updated_at"
+		],
+		"encoded_fields": [
+			"customer",
+			"line_items",
+			"refunds"
+		]
+	},
+	"schema": [
+		{
+			"name": "id",
+			"type": "INTEGER"
+		},
+		{
+			"name": "app_id",
+			"type": "INTEGER"
+		},
+		{
+			"name": "closed_at",
+			"type": "TIMESTAMP"
+		},
+		{
+			"name": "created_at",
+			"type": "TIMESTAMP"
+		},
+		{
+			"name": "currency",
+			"type": "STRING"
+		},
+		{
+			"name": "email",
+			"type": "STRING"
+		},
+		{
+			"name": "order_number",
+			"type": "INTEGER"
+		},
+		{
+			"name": "processed_at",
+			"type": "TIMESTAMP"
+		},
+		{
+			"name": "source_name",
+			"type": "STRING"
+		},
+		{
+			"name": "subtotal_price",
+			"type": "FLOAT"
+		},
+		{
+			"name": "total_discounts",
+			"type": "FLOAT"
+		},
+		{
+			"name": "total_price",
+			"type": "FLOAT"
+		},
+		{
+			"name": "updated_at",
+			"type": "TIMESTAMP"
+		},
+		{
+			"name": "customer",
+			"type": "STRING"
+		},
+		{
+			"name": "line_items",
+			"type": "STRING"
+		},
+		{
+			"name": "refunds",
+			"type": "STRING"
+		}
+	]
+}

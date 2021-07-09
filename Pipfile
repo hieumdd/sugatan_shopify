@@ -7,14 +7,11 @@ name = "pypi"
 requests = "*"
 google-cloud-bigquery = "*"
 jinja2 = "*"
-python-dotenv = "*"
-functions-framework = "*"
+google-cloud-pubsub = "*"
 
 [dev-packages]
 black = "*"
 pytest = "*"
-pytest-dotenv = "*"
-functions-framework = "*"
 
 [requires]
 python_version = "3.8"

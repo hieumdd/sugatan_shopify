@@ -5,36 +5,13 @@ on:
   workflow_dispatch:
 
 env:
-  PROJECT_ID: ${{ secrets.PROJECT_ID }}
-  TOPIC_ID: shopify_orders
+  FUNCTIONS_NAME: Sugatan_Shopify
   REGION: us-central1
-  API_VER: 2021-04
-
+  API_VER: 2021-07
 
 jobs:
   gcf:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        clients: [AverrAglow, MaineRoast]
-        include:
-          - clients: AverrAglow
-            FUNCTIONS_NAME: AverrAglow_Shopify
-            API_KEY: AVERRAGLOW_API_KEY
-            API_SECRET: AVERRAGLOW_API_SECRET
-            SHOP_URL: AVERRAGLOW_SHOP_URL
-
-          - clients: Moxielash
-            FUNCTIONS_NAME: Moxielash_Shopify
-            API_KEY: MOXIELASH_API_KEY
-            API_SECRET: MOXIELASH_API_SECRET
-            SHOP_URL: MOXIELASH_SHOP_URL
-
-          - clients: MaineRoast
-            FUNCTIONS_NAME: MaineRoast_Shopify
-            API_KEY: MAINEROAST_API_KEY
-            API_SECRET: MAINEROAST_API_SECRET
-            SHOP_URL: MAINEROAST_SHOP_URL
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -46,76 +23,15 @@ jobs:
           export_default_credentials: true
 
       - name: Deploy to Cloud Functions
-        env:
-          FUNCTIONS_NAME: ${{ matrix.FUNCTIONS_NAME }}
-          BUSINESS: ${{ matrix.clients }}
-          API_KEY: ${{ matrix.API_KEY }}
-          API_SECRET: ${{ matrix.API_SECRET }}
-          SHOP_URL: ${{ matrix.SHOP_URL }}
         run: >-
           gcloud functions deploy ${{ env.FUNCTIONS_NAME }}
           --entry-point=main
           --timeout=530
-          --project=${{ env.PROJECT_ID }}
+          --project=${{ secrets.PROJECT_ID }}
           --memory=1024MB
           --runtime=python38
-          --trigger-topic=${{ env.TOPIC_ID }}
+          --trigger-http
           --service-account=${{ secrets.GCP_SA }}
-          --set-env-vars=API_KEY=${{ secrets[matrix.API_KEY] }},API_SECRET=${{ secrets[matrix.API_SECRET] }},API_VER=${{ env.API_VER }},SHOP_URL=${{ secrets[matrix.SHOP_URL] }},BUSINESS=${{ env.BUSINESS }}
-
-  # gcr:
-  #   if: github.event_name == 'workflow_dispatch'
-  #   runs-on: ubuntu-latest
-  #   strategy:
-  #     matrix:
-  #       clients: [AverrAglow]
-  #       include:
-  #         - clients: AverrAglow
-  #           SERVICE: averraglow-shopify
-  #           API_KEY: AVERRAGLOW_API_KEY
-  #           API_SECRET: AVERRAGLOW_API_SECRET
-  #           SHOP_URL: AVERRAGLOW_SHOP_URL
-  #   steps:
-  #     - name: Checkout
-  #       uses: actions/checkout@v2
-
-  #     - name: Setup Cloud SDK
-  #       uses: google-github-actions/setup-gcloud@v0.2.0
-  #       with:
-  #         service_account_key: ${{ secrets.GCP_SA_KEY }}
-  #         project_id: ${{ env.PROJECT_ID }}
-  #         export_default_credentials: true
-      
-  #     - name: Authorize Docker push
-  #       run: gcloud auth configure-docker
-
-  #     - name: Build and Push Container
-  #       run: |-
-  #         docker build -t gcr.io/${{ env.PROJECT_ID }}/${{ matrix.SERVICE }}:${{ github.sha }} .
-  #         docker push gcr.io/${{ env.PROJECT_ID }}/${{ matrix.SERVICE }}:${{ github.sha }}
-
-  #     - name: Install gcloud beta
-  #       run: >-
-  #         gcloud components install beta
-
-  #     - name: Deploy to Cloud Run
-  #       env:
-  #         NAME: ${{ matrix.NAME }}
-  #         BUSINESS: ${{ matrix.clients }}
-  #         SERVICE: ${{ matrix.SERVICE }}
-  #         API_KEY: ${{ matrix.API_KEY }}
-  #         API_SECRET: ${{ matrix.API_SECRET }}
-  #         SHOP_URL: ${{ matrix.SHOP_URL }}
-  #       run: >-
-  #         gcloud beta run deploy ${{ matrix.SERVICE }}
-  #         --image=gcr.io/${{ env.PROJECT_ID }}/${{ matrix.SERVICE }}:${{  github.sha }}
-  #         --concurrency=1
-  #         --memory=1Gi
-  #         --cpu=2
-  #         --platform=managed
-  #         --service-account=${{ secrets.GCP_SA }}
-  #         --region=${{ env.REGION }}
-  #         --timeout=1200
-  #         --set-env-vars=API_KEY=${{ secrets[matrix.API_KEY] }},API_SECRET=${{ secrets[matrix.API_SECRET] }},API_VER=${{ env.API_VER }},SHOP_URL=${{ secrets[matrix.SHOP_URL] }},BUSINESS=${{ env.BUSINESS }}
+          --set-env-vars=PROJECT_ID={{ secrets.PROJECT_ID }},TOPIC_ID={{ secrets.TOPIC_ID }},AverrAglow_API_KEY=${{ secrets.AverrAglow_API_KEY }},AverrAglow_API_SECRET=${{ secrets.AverrAglow_API_SECRET }},Moxielash_API_KEY=${{ secrets.Moxielash_API_KEY }},Moxielash_API_SECRET=${{ secrets.Moxielash_API_SECRET }},MaineRoast_API_KEY=${{ secrets.MaineRoast_API_KEY }},MaineRoast_API_SECRET=${{ secrets.MaineRoast_API_SECRET }}
 
   
