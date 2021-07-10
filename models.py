@@ -23,8 +23,6 @@ class Orders:
 
         self.client_name = client_name 
         self.api_key, self.api_secret, self.shop_url = self.get_credentials(client_name)
-        # self.api_secret = api_secret 
-        # self.shop_url = shop_url
         self.dataset = f"{client_name}_Shopify"
         self.start, self.end = self.get_time_range(start, end)
 
