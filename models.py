@@ -1,6 +1,7 @@
 import os
 import json
 from datetime import datetime, timedelta
+from google.api_core.exceptions import NotFound
 
 import requests
 import jinja2
@@ -24,8 +25,8 @@ class Orders:
         self.client_name = client_name 
         self.api_key, self.api_secret, self.shop_url = self.get_credentials(client_name)
         self.dataset = f"{client_name}_Shopify"
-        self.start, self.end = self.get_time_range(start, end)
         self.fields, self.encoded_fields, self.schema, self.keys = self.get_config()
+        self.start, self.end = self.get_time_range(start, end)
 
     def get_credentials(self, client_name):
         with open('configs/clients.json', 'r') as f:
@@ -39,7 +40,20 @@ class Orders:
         else:
             now = datetime.utcnow()
             end = now.strftime(TIMESTAMP_FORMAT)
-            start = (now - timedelta(days=1)).strftime(TIMESTAMP_FORMAT)
+            template = TEMPLATE_ENV.get_template("read_max_incremental.sql.j2")
+            rendered_query = template.render(
+                dataset=self.dataset,
+                table=self.table,
+                incre_key=self.keys.get('incre_key')
+            )
+            try:
+                rows = BQ_CLIENT.query(rendered_query).result()
+                row = [dict(row) for row in rows][0]
+                incre = row['incre']
+                start = incre.replace(tzinfo=None).strftime(TIMESTAMP_FORMAT)
+                start
+            except NotFound:
+                start = (now - timedelta(days=1)).strftime(TIMESTAMP_FORMAT)    
         return start, end
 
     def get_config(self):
@@ -128,9 +142,9 @@ class Orders:
     def update(self):
         """Update the main table using the staging table"""
         
-        template = TEMPLATE_ENV.get_template("update.sql.j2")
+        template = TEMPLATE_ENV.get_template("update_from_stage.sql.j2")
         rendered_query = template.render(dataset=self.dataset, table=self.table)
-        _ = BQ_CLIENT.query(rendered_query)
+        BQ_CLIENT.query(rendered_query)
 
     def run(self):
         """Run the job
