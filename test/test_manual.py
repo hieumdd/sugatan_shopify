@@ -10,10 +10,10 @@ def test_manual():
     
     data = {
         "client_name": CLIENT_NAME,
-        "start": (datetime(2021, 7, 1, 0, 0, 0)).strftime(
+        "start": (datetime(2021, 7, 15, 0, 0, 0)).strftime(
             "%Y-%m-%dT%H:%M:%S%z"
         ),
-        "end": (datetime(2021, 7, 2, 0, 0, 0)).strftime(
+        "end": (datetime(2021, 8, 1, 0, 0, 0)).strftime(
             "%Y-%m-%dT%H:%M:%S%z"
         ),
     }

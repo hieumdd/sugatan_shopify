@@ -25,7 +25,6 @@ class Orders:
         self.api_key, self.api_secret, self.shop_url = self.get_credentials(client_name)
         self.dataset = f"{client_name}_Shopify"
         self.start, self.end = self.get_time_range(start, end)
-
         self.fields, self.encoded_fields, self.schema, self.keys = self.get_config()
 
     def get_credentials(self, client_name):
@@ -104,8 +103,6 @@ class Orders:
             for f in self.encoded_fields:
                 if f in i:
                     i[f] = json.dumps(i[f])
-                else:
-                    pass
         return rows
 
     def load(self, rows):

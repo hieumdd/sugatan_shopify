@@ -20,6 +20,8 @@
 			"refunds",
 			"source_name",
 			"subtotal_price",
+			"total_tax",
+			"total_shipping_price_set",
 			"total_discounts",
 			"total_price",
 			"updated_at"
@@ -70,6 +72,44 @@
 		{
 			"name": "subtotal_price",
 			"type": "FLOAT"
+		},
+		{
+			"name": "total_tax",
+			"type": "FLOAT"
+		},
+		{
+			"name": "total_shipping_price_set",
+			"type": "record",
+			"fields": [
+				{
+					"name": "shop_money",
+					"type": "record",
+					"fields": [
+						{
+							"name": "amount",
+							"type": "FLOAT"
+						},
+						{
+							"name": "currency_code",
+							"type": "STRING"
+						}
+					]
+				},
+				{
+					"name": "presentment_money",
+					"type": "record",
+					"fields": [
+						{
+							"name": "amount",
+							"type": "FLOAT"
+						},
+						{
+							"name": "currency_code",
+							"type": "STRING"
+						}
+					]
+				}
+			]
 		},
 		{
 			"name": "total_discounts",
