@@ -6,5 +6,9 @@
     {
         "client_name": "SBLA",
         "shop_url": "spencer-barnes.myshopify.com"
+    },
+    {
+        "client_name": "MotivArt",
+        "shop_url": "willyoudo.myshopify.com"
     }
 ]
