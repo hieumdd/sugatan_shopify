@@ -32,7 +32,7 @@ class Orders:
         with open('configs/clients.json', 'r') as f:
             clients = json.load(f)
         shop_url = [i['shop_url'] for i in clients if i['client_name']==client_name][0]
-        return os.getenv(f"{client_name}_API_KEY"), os.getenv(f"{client_name}_API_SECRET"), shop_url
+        return (os.getenv(f"{client_name}_API_KEY"), os.getenv(f"{client_name}_API_SECRET"), shop_url,)
 
     def get_time_range(self, _start, _end):
         if _start and _end:
@@ -44,14 +44,13 @@ class Orders:
             rendered_query = template.render(
                 dataset=self.dataset,
                 table=self.table,
-                incre_key=self.keys.get('incre_key')
+                incre_key=self.keys.get('incre_key'),
             )
             try:
                 rows = BQ_CLIENT.query(rendered_query).result()
                 row = [dict(row) for row in rows][0]
                 incre = row['incre']
                 start = incre.replace(tzinfo=None).strftime(TIMESTAMP_FORMAT)
-                start
             except NotFound:
                 start = (now - timedelta(days=1)).strftime(TIMESTAMP_FORMAT)    
         return start, end
@@ -88,7 +87,7 @@ class Orders:
         with requests.Session() as session:
             _url = url
             while _url:
-                with session.get(_url, params=params) as r:
+                with session.get(_url, params=params,) as r:
                     res = r.json()
                 orders.extend(res.get("orders"))
                 next_link = r.links.get("next")
@@ -100,7 +99,7 @@ class Orders:
                     )
                 else:
                     _url = None
-                params = {"limit": 250}
+                params = {"limit": 250,}
         return orders
 
     def transform(self, rows):
@@ -143,7 +142,7 @@ class Orders:
         """Update the main table using the staging table"""
         
         template = TEMPLATE_ENV.get_template("update_from_stage.sql.j2")
-        rendered_query = template.render(dataset=self.dataset, table=self.table)
+        rendered_query = template.render(dataset=self.dataset, table=self.table,)
         BQ_CLIENT.query(rendered_query)
 
     def run(self):
@@ -156,8 +155,8 @@ class Orders:
         rows = self.get()
         responses = {
             "table": f"{self.dataset}.{self.table}",
-            "start_date": self.start,
-            "end_date": self.end,
+            "start": self.start,
+            "end": self.end,
         }
         if len(rows) > 0:
             rows = self.transform(rows)

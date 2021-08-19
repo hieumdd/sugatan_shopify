@@ -19,4 +19,6 @@ def broadcast():
         message_bytes = message_json.encode("utf-8")
         publisher.publish(topic_path, data=message_bytes).result()
 
-    return {"message_sent": len(clients)}
+    return {
+        "message_sent": len(clients),
+    }

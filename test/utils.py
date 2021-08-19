@@ -7,13 +7,13 @@ from main import main
 def encode_data(data):
     data_json = json.dumps(data)
     data_encoded = base64.b64encode(data_json.encode("utf-8"))
-    return {"message": {"data": data_encoded}}
+    return {"message": {"data": data_encoded,},}
 
 def assertion(res):
     results = res["results"]
-    assert results["num_processed"] > 0
-    assert results["output_rows"] > 0
-    assert results["num_processed"] == results["output_rows"]
+    assert results["num_processed"] >= 0
+    if results["num_processed"] > 0:
+        assert results["num_processed"] == results["output_rows"]
 
 def process(data):
     message = encode_data(data)

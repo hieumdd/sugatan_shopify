@@ -20,6 +20,9 @@ def main(request):
                 data.get('start'),
                 data.get('end')
             ).run()
-    response = {"pipelines": "Shopify", "results": job}
+    response = {
+        "pipelines": "Shopify",
+        "results": job,
+    }
     print(response)
     return response
