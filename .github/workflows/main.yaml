@@ -32,6 +32,6 @@ jobs:
           --runtime=python38
           --trigger-http
           --service-account=${{ secrets.GCP_SA }}
-          --set-env-vars=API_VER=${{ env.API_VER }},PROJECT_ID=${{ secrets.PROJECT_ID }},TOPIC_ID=${{ secrets.TOPIC_ID }},MaineRoast_API_KEY=${{ secrets.MaineRoast_API_KEY }},MaineRoast_API_SECRET=${{ secrets.MaineRoast_API_SECRET }},SBLA_API_KEY=${{ secrets.SBLA_API_KEY }},SBLA_API_SECRET=${{ secrets.SBLA_API_SECRET }}
+          --set-env-vars=API_VER=${{ env.API_VER }},PROJECT_ID=${{ secrets.PROJECT_ID }},TOPIC_ID=${{ secrets.TOPIC_ID }},MaineRoast_API_KEY=${{ secrets.MaineRoast_API_KEY }},MaineRoast_API_SECRET=${{ secrets.MaineRoast_API_SECRET }},SBLA_API_KEY=${{ secrets.SBLA_API_KEY }},SBLA_API_SECRET=${{ secrets.SBLA_API_SECRET }},MotivArt_API_KEY=${{ secrets.MotivArt_API_KEY }},MotivArt_API_SECRET=${{ secrets.MotivArt_API_SECRET }}
 
   

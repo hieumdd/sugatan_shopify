@@ -87,7 +87,10 @@ class Orders:
         with requests.Session() as session:
             _url = url
             while _url:
-                with session.get(_url, params=params,) as r:
+                with session.get(
+                    _url,
+                    params=params,
+                ) as r:
                     res = r.json()
                 orders.extend(res.get("orders"))
                 next_link = r.links.get("next")
@@ -99,7 +102,9 @@ class Orders:
                     )
                 else:
                     _url = None
-                params = {"limit": 250,}
+                params = {
+                    "limit": 250,
+                }
         return orders
 
     def transform(self, rows):
