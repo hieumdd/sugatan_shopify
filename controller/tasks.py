@@ -34,6 +34,7 @@ CLIENTS: list[RawAuth] = [
     },
 ]
 
+
 def get_secret(
     secret_client: secretmanager.SecretManagerServiceClient,
     secret_id: str,
@@ -65,16 +66,15 @@ def build_auth(
         ),
     }
 
+
 AUTHS = [build_auth(SECRET_CLIENT, i) for i in CLIENTS]
-
-
 
 
 def create_tasks(
     tasks_client: tasks_v2.CloudTasksClient,
     tasks_data: dict,
 ) -> dict:
-    tasks_path = (os.getenv("PROJECT_ID", ""), "us-central1", "sugatan-shopify")
+    tasks_path = (os.getenv("PROJECT_ID", ""), "us-central1", "shopify")
     payloads = [
         {
             "name": f"{auth['client']}-{uuid.uuid4()}",

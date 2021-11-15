@@ -5,6 +5,8 @@ import pytest
 from main import main
 from controller.tasks import AUTHS
 
+START, END = ("2021-10-01", "2021-11-02")
+
 
 def run(data):
     req = Mock(get_json=Mock(return_value=data), args=data)
@@ -20,7 +22,7 @@ def run(data):
     ("start", "end"),
     [
         (None, None),
-        ("2021-10-01", "2021-11-02"),
+        (START, END),
     ],
     ids=["auto", "manual"],
 )
@@ -36,3 +38,22 @@ def test_auto(auth, start, end):
     )
     if res["num_processed"] > 0:
         assert res["num_processed"] == res["output_rows"]
+
+
+@pytest.mark.parametrize(
+    ("start", "end"),
+    [
+        (None, None),
+        (START, END),
+    ],
+    ids=["auto", "manual"],
+)
+def test_tasks(start, end):
+    res = run(
+        {
+            "tasks": "orders",
+            "start": start,
+            "end": end,
+        }
+    )
+    assert res["message_sent"] > 0
