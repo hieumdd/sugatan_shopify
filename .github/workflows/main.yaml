@@ -31,6 +31,6 @@ jobs:
           --runtime=python39
           --trigger-http
           --service-account=${{ secrets.GCP_SA }}
-          --set-env-vars=GCP_SA=${{ secrets.GCP_SA }},PUBLIC_URL=${{ env.PUBLIC_URL }}
+          --set-env-vars=PROJECT_ID=${{ secrets.PROJECT_ID }},GCP_SA=${{ secrets.GCP_SA }},PUBLIC_URL=${{ env.PUBLIC_URL }}
 
   
