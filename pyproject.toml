@@ -8,8 +8,8 @@ authors = ["HM <hieumdd@gmail.com>"]
 python = "~3.9"
 requests = "^2.26.0"
 google-cloud-bigquery = "^2.30.1"
-Jinja2 = "^3.0.3"
-google-cloud-pubsub = "^2.9.0"
+google-cloud-secret-manager = "^2.8.0"
+google-cloud-tasks = "^2.7.1"
 
 [tool.poetry.dev-dependencies]
 black = "^21.10b0"
@@ -21,3 +21,9 @@ types-requests = "^2.26.0"
 [build-system]
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.pytest.ini_options]
+addopts = "-s --durations=0"
+testpaths = [
+    "test",
+]

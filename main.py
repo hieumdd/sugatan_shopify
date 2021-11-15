@@ -1,14 +1,6 @@
-import requests
-from google.cloud import bigquery
-
-
-from models.models import Orders
+from models.shopify import Orders
 from controller.handler import run
-
-from broadcast import broadcast
-
-BQ_CLIENT = bigquery.Client()
-SESSION = requests.Session()
+from controller.tasks import create_tasks
 
 
 def main(request):
@@ -16,20 +8,16 @@ def main(request):
     print(data)
 
     if data:
-        if "broadcast" in data:
-            job = broadcast()
+        if "tasks" in data:
+            response = create_tasks(data)
         else:
-            response = run(
-                BQ_CLIENT,
-                SESSION,
+            err_response, response = run(
                 Orders,
                 data["auth"],
                 data.get("start"),
                 data.get("end"),
             )
-    response = {
-        "pipelines": "Shopify",
-        "results": job,
-    }
+            if err_response:
+                raise err_response
     print(response)
     return response
