@@ -56,4 +56,4 @@ def test_tasks(start, end):
             "end": end,
         }
     )
-    assert res["message_sent"] > 0
+    assert res["messages_sent"] > 0
