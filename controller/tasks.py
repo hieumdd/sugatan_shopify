@@ -70,10 +70,7 @@ def build_auth(
 AUTHS = [build_auth(SECRET_CLIENT, i) for i in CLIENTS]
 
 
-def create_tasks(
-    tasks_client: tasks_v2.CloudTasksClient,
-    tasks_data: dict,
-) -> dict:
+def create_tasks(tasks_data: dict) -> dict:
     tasks_path = (os.getenv("PROJECT_ID", ""), "us-central1", "shopify")
     payloads = [
         {
@@ -88,7 +85,7 @@ def create_tasks(
     ]
     tasks = [
         {
-            "name": tasks_client.task_path(*tasks_path, task=f"{payload['name']}"),
+            "name": TASKS_CLIENT.task_path(*tasks_path, task=f"{payload['name']}"),
             "http_request": {
                 "http_method": tasks_v2.HttpMethod.POST,
                 "url": os.getenv("PUBLIC_URL"),
@@ -104,9 +101,9 @@ def create_tasks(
         for payload in payloads
     ]
     responses = [
-        tasks_client.create_task(
+        TASKS_CLIENT.create_task(
             request={
-                "parent": tasks_client.queue_path(*tasks_path),
+                "parent": TASKS_CLIENT.queue_path(*tasks_path),
                 "task": task,
             }
         )
