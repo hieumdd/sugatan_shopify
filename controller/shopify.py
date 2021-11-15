@@ -5,6 +5,8 @@ import requests
 
 TIMESTAMP_FORMAT = "%Y-%m-%dT%H:%M:%S%z"
 
+API_VER = "2021-10"
+
 
 class Auth(TypedDict):
     client: str
@@ -15,7 +17,7 @@ class Auth(TypedDict):
 
 ParamsBuilder = Callable[[str, str], dict]
 
-Getter = Callable[
+Fetcher = Callable[
     [
         requests.Session,
         Auth,
@@ -23,6 +25,16 @@ Getter = Callable[
         Optional[str],
     ],
     list[dict],
+]
+
+Getter = Callable[
+    [
+        requests.Session,
+        Auth,
+        str,
+        str,
+    ],
+    tuple[Optional[Exception], Optional[list[dict]]],
 ]
 
 
@@ -44,8 +56,8 @@ def build_params(fields: list[str]) -> ParamsBuilder:
     return build
 
 
-def get(api_ver: str, endpoint: str) -> Getter:
-    def _get(
+def fetch(endpoint: str, data_key: str) -> Fetcher:
+    def _fetch(
         session: requests.Session,
         auth: Auth,
         params: dict,
@@ -54,51 +66,45 @@ def get(api_ver: str, endpoint: str) -> Getter:
         _url = (
             url
             if url
-            else f"https://{auth['api_key']}:{auth['api_secret']}@{auth['shop_url']}/admin/api/{api_ver}/{endpoint}"
+            else f"https://{auth['api_key']}:{auth['api_secret']}@{auth['shop_url']}/admin/api/{API_VER}/{endpoint}"
         )
         with session.get(_url, params=params) as r:
             res = r.json()
             next_link = r.links.get("next")
-        orders = res["orders"]
+        data = res[data_key]
         return (
-            orders
-            + _get(
+            data
+            + _fetch(
                 session,
-                auth=auth,
-                params={**limit},
-                url=next_link.get("url").replace(
+                auth,
+                {**limit},
+                next_link.get("url").replace(
                     auth["shop_url"],
                     f"{auth['api_key']}:{auth['api_secret']}@{auth['shop_url']}",
                 ),
             )
             if next_link
-            else orders
+            else data
         )
+
+    return _fetch
+
+
+def get(fetcher: Fetcher, params_builder: ParamsBuilder) -> Getter:
+    def _get(
+        session: requests.Session,
+        auth: Auth,
+        start: str,
+        end: str,
+    ) -> tuple[Optional[Exception], Optional[list[dict]]]:
+        try:
+            return None, fetcher(
+                session,
+                auth,
+                params_builder(start, end),
+                None,
+            )
+        except Exception as e:
+            return e, None
 
     return _get
-
-
-def get_data(
-    session: requests.Session,
-    api_ver: str,
-    endpoint: str,
-    fields: list[str],
-    auth: Auth,
-    start: str,
-    end: str,
-):
-    try:
-        return None, get(api_ver, endpoint)(
-            session,
-            auth,
-            {
-                **limit,
-                "fields": ",".join(fields),
-                "status": "any",
-                "updated_at_min": start,
-                "updated_at_max": end,
-            },
-            None,
-        )
-    except Exception as e:
-        return e, None

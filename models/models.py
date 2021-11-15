@@ -1,40 +1,44 @@
 from typing import Callable, TypedDict
 import json
 
+from controller.shopify import Fetcher, get, build_params, fetch
+from controller.bigquery import Loader, TimeRangeGetter, load, get_time_range
+
 
 class ShopifyResource(TypedDict):
-    table: str
-    fields: list[str]
-    api_ver: str
-    endpoint: str
+    time_range_getter: TimeRangeGetter
+    getter: Fetcher
     transform: Callable[[list[dict]], list[dict]]
-    schema: list[dict]
+    loader: Loader
 
 
 Orders: ShopifyResource = {
-    "table": "Orders",
-    "fields": [
-        "app_id",
-        "closed_at",
-        "created_at",
-        "currency",
-        "customer",
-        "email",
-        "id",
-        "line_items",
-        "order_number",
-        "processed_at",
-        "refunds",
-        "source_name",
-        "subtotal_price",
-        "total_tax",
-        "total_shipping_price_set",
-        "total_discounts",
-        "total_price",
-        "updated_at",
-    ],
-    "api_ver": "2021-10",
-    "endpoint": "orders.json",
+    "time_range_getter": get_time_range("Orders"),
+    "getter": get(
+        fetch("orders.json", "orders"),
+        build_params(
+            [
+                "app_id",
+                "closed_at",
+                "created_at",
+                "currency",
+                "customer",
+                "email",
+                "id",
+                "line_items",
+                "order_number",
+                "processed_at",
+                "refunds",
+                "source_name",
+                "subtotal_price",
+                "total_tax",
+                "total_shipping_price_set",
+                "total_discounts",
+                "total_price",
+                "updated_at",
+            ]
+        ),
+    ),
     "transform": lambda rows: [
         {
             "id": row.get("id"),
@@ -81,45 +85,48 @@ Orders: ShopifyResource = {
         }
         for row in rows
     ],
-    "schema": [
-        {"name": "id", "type": "INTEGER"},
-        {"name": "app_id", "type": "INTEGER"},
-        {"name": "closed_at", "type": "TIMESTAMP"},
-        {"name": "created_at", "type": "TIMESTAMP"},
-        {"name": "currency", "type": "STRING"},
-        {"name": "email", "type": "STRING"},
-        {"name": "order_number", "type": "INTEGER"},
-        {"name": "processed_at", "type": "TIMESTAMP"},
-        {"name": "source_name", "type": "STRING"},
-        {"name": "subtotal_price", "type": "FLOAT"},
-        {"name": "total_tax", "type": "FLOAT"},
-        {
-            "name": "total_shipping_price_set",
-            "type": "record",
-            "fields": [
-                {
-                    "name": "shop_money",
-                    "type": "record",
-                    "fields": [
-                        {"name": "amount", "type": "FLOAT"},
-                        {"name": "currency_code", "type": "STRING"},
-                    ],
-                },
-                {
-                    "name": "presentment_money",
-                    "type": "record",
-                    "fields": [
-                        {"name": "amount", "type": "FLOAT"},
-                        {"name": "currency_code", "type": "STRING"},
-                    ],
-                },
-            ],
-        },
-        {"name": "total_discounts", "type": "FLOAT"},
-        {"name": "total_price", "type": "FLOAT"},
-        {"name": "updated_at", "type": "TIMESTAMP"},
-        {"name": "customer", "type": "STRING"},
-        {"name": "line_items", "type": "STRING"},
-        {"name": "refunds", "type": "STRING"},
-    ],
+    "loader": load(
+        "Orders",
+        [
+            {"name": "id", "type": "INTEGER"},
+            {"name": "app_id", "type": "INTEGER"},
+            {"name": "closed_at", "type": "TIMESTAMP"},
+            {"name": "created_at", "type": "TIMESTAMP"},
+            {"name": "currency", "type": "STRING"},
+            {"name": "email", "type": "STRING"},
+            {"name": "order_number", "type": "INTEGER"},
+            {"name": "processed_at", "type": "TIMESTAMP"},
+            {"name": "source_name", "type": "STRING"},
+            {"name": "subtotal_price", "type": "FLOAT"},
+            {"name": "total_tax", "type": "FLOAT"},
+            {
+                "name": "total_shipping_price_set",
+                "type": "record",
+                "fields": [
+                    {
+                        "name": "shop_money",
+                        "type": "record",
+                        "fields": [
+                            {"name": "amount", "type": "FLOAT"},
+                            {"name": "currency_code", "type": "STRING"},
+                        ],
+                    },
+                    {
+                        "name": "presentment_money",
+                        "type": "record",
+                        "fields": [
+                            {"name": "amount", "type": "FLOAT"},
+                            {"name": "currency_code", "type": "STRING"},
+                        ],
+                    },
+                ],
+            },
+            {"name": "total_discounts", "type": "FLOAT"},
+            {"name": "total_price", "type": "FLOAT"},
+            {"name": "updated_at", "type": "TIMESTAMP"},
+            {"name": "customer", "type": "STRING"},
+            {"name": "line_items", "type": "STRING"},
+            {"name": "refunds", "type": "STRING"},
+        ],
+    ),
 }

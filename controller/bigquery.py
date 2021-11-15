@@ -1,28 +1,53 @@
 from datetime import datetime
-from typing import Callable
+from typing import Callable, Optional
 
 from google.cloud import bigquery
 
 TIMESTAMP_FORMAT = "%Y-%m-%dT%H:%M:%S%z"
 
-Loader = Callable[[bigquery.Client, str, str, list[dict]], int]
+TimeRangeGetter = Callable[
+    [
+        bigquery.Client,
+        str,
+        Optional[str],
+        Optional[str],
+    ],
+    tuple[str, str],
+]
+
+Loader = Callable[[bigquery.Client, str, list[dict]], int]
 
 
-def get_time_range(client, dataset, table, start, end):
-    if start and end:
-        _start, _end = start, end
-    else:
-        rows = client.query(
-            f"""SELECT MAX(updated_at) AS incre FROM {dataset}.{table}"""
-        ).result()
-        row = [dict(row) for row in rows][0]
-        _start = row["incre"].replace(tzinfo=None).strftime(TIMESTAMP_FORMAT)
-        _end = datetime.utcnow().strftime(TIMESTAMP_FORMAT)
-    return _start, _end
+def get_time_range(table: str) -> TimeRangeGetter:
+    def get(
+        client: bigquery.Client,
+        dataset: str,
+        start: str = None,
+        end: str = None,
+    ) -> tuple[str, str]:
+        if start and end:
+            _start, _end = start, end
+        else:
+            rows = client.query(
+                f"""SELECT MAX(updated_at) AS incre FROM {dataset}.{table}"""
+            ).result()
+            row = [dict(row) for row in rows][0]
+            _start = row["incre"].replace(tzinfo=None).strftime(TIMESTAMP_FORMAT)
+            _end = datetime.utcnow().strftime(TIMESTAMP_FORMAT)
+        return _start, _end
+
+    return get
 
 
-def load(schema: list[dict]) -> Loader:
-    def _load(client: bigquery.Client, dataset: str, table: str, rows: list[dict]) -> int:
+def load(
+    table: str,
+    schema: list[dict],
+) -> Loader:
+    def _load(
+        client: bigquery.Client,
+        dataset: str,
+        rows: list[dict],
+    ) -> int:
         output_rows = (
             client.load_table_from_json(
                 rows,
